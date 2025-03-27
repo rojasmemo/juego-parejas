@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Parejas</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="game-info">
+            <span class="moves">Movimientos: 0</span>
+            <span class="timer">Tiempo: 0</span>
+        </div>
+        <div class="game-board"></div>
+        <div class="buttons">
+            <button class="restart-btn">Reiniciar Juego</button>
+            <button class="view-ranking-btn">Ver Ranking</button>
+            <button class="clear-ranking-btn">Borrar Ranking</button>
+        </div>
+        <div class="ranking" style="display: none;">
+            <h2>Mejores Puntuaciones</h2>
+            <ol id="ranking-list"></ol>
+        </div>
+    </div>
+    <script src="js/game.js"></script>
+</body>
+</html>
