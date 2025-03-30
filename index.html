@@ -3,26 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Parejas</title>
+    <meta name="description" content="Juego de memoria para encontrar parejas de cartas">
+    <meta name="theme-color" content="#2196F3">
+    <meta name="author" content="Tu Nombre">
+    
+    <title>Juego de Parejas | Encuentra las coincidencias</title>
+    
+    <!-- Precargar recursos críticos -->
+    <link rel="preload" href="css/styles.css" as="style">
+    <link rel="preload" href="js/game.js" as="script">
+    
+    <!-- Estilos -->
     <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
     <div class="container">
-        <div class="game-info">
-            <span class="moves">Movimientos: 0</span>
-            <span class="timer">Tiempo: 0</span>
-        </div>
-        <div class="game-board"></div>
-        <div class="buttons">
-            <button class="restart-btn">Reiniciar Juego</button>
-            <button class="view-ranking-btn">Ver Ranking</button>
-            <button class="clear-ranking-btn">Borrar Ranking</button>
-        </div>
-        <div class="ranking" style="display: none;">
-            <h2>Mejores Puntuaciones</h2>
-            <ol id="ranking-list"></ol>
-        </div>
+        <header class="game-header">
+            <h1>Juego de Parejas</h1>
+            <p class="game-description">Encuentra todas las parejas de cartas en el menor tiempo posible</p>
+        </header>
+        
+        <main class="game-main">
+            <!-- Panel de información del juego -->
+            <section class="game-info" role="status" aria-live="polite">
+                <div class="info-item moves">
+                    <span class="info-label">Movimientos:</span>
+                    <span id="moves-count" class="info-value">0</span>
+                </div>
+                <div class="info-item timer">
+                    <span class="info-label">Tiempo:</span>
+                    <span id="time-count" class="info-value">0</span>
+                </div>
+            </section>
+
+            <!-- Tablero de juego -->
+            <section class="game-board" 
+                    role="grid" 
+                    aria-label="Tablero de juego"
+                    data-difficulty="normal">
+            </section>
+
+            <!-- Controles del juego -->
+            <section class="game-controls">
+                <div class="buttons">
+                    <button class="btn restart-btn" 
+                            aria-label="Reiniciar juego"
+                            data-action="restart">
+                        Reiniciar Juego
+                    </button>
+                    <button class="btn view-ranking-btn" 
+                            aria-expanded="false"
+                            data-action="view-ranking">
+                        Ver Ranking
+                    </button>
+                    <button class="btn clear-ranking-btn" 
+                            aria-label="Borrar ranking"
+                            data-action="clear-ranking">
+                        Borrar Ranking
+                    </button>
+                </div>
+            </section>
+
+            <!-- Panel de ranking -->
+            <section class="ranking" 
+                     hidden 
+                     role="region" 
+                     aria-label="Ranking">
+                <h2>Mejores Puntuaciones</h2>
+                <ol id="ranking-list" class="ranking-list"></ol>
+            </section>
+        </main>
     </div>
-    <script src="js/game.js"></script>
+
+    <!-- Scripts -->
+    <script src="js/game.js" defer></script>
 </body>
 </html>
