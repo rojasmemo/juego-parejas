@@ -1,253 +1,167 @@
-class MemoryGame {
-    // Constantes del juego
-    static EMOJIS = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵'];
-    static FLIP_DELAY = 1000;
-    static MAX_RANKING_ITEMS = 10;
-    static STORAGE_KEY = 'memoryGameRanking';
+const ANIMAL_EMOJIS = [
+    '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼',
+    '🐨', '🦁', '🐯', '🐸', '🦉', '🦒', '🦘'
+];
 
-    constructor() {
-        this.initializeProperties();
-        this.initializeDOMElements();
-        this.init();
-        this.addRankingEventListeners();
+let firstCard = null;
+let secondCard = null;
+let canFlip = true;
+let moves = 0;
+let timeElapsed = 0;
+let timerInterval = null;
+let matchedPairs = 0;
+
+function createCards() {
+    const gameBoard = document.querySelector('.game-board');
+    const totalPairs = 15; // 30 cartas en total (15 pares)
+    const cards = [];
+    
+    // Crear array con pares de animales
+    for (let i = 0; i < totalPairs; i++) {
+        cards.push(ANIMAL_EMOJIS[i], ANIMAL_EMOJIS[i]);
     }
-
-    initializeProperties() {
-        this.cards = [];
-        this.moves = 0;
-        this.timer = 0;
-        this.flippedCards = [];
-        this.matchedPairs = 0;
-        this.timerInterval = null;
-        this.ranking = this.loadRanking();
-    }
-
-    initializeDOMElements() {
-        this.gameBoard = document.querySelector('.game-board');
-        this.movesElement = document.querySelector('.moves');
-        this.timerElement = document.querySelector('.timer');
-        this.restartBtn = document.querySelector('.restart-btn');
-        this.viewRankingBtn = document.querySelector('.view-ranking-btn');
-        this.clearRankingBtn = document.querySelector('.clear-ranking-btn');
-        this.rankingDiv = document.querySelector('.ranking');
-    }
-
-    loadRanking() {
-        return JSON.parse(localStorage.getItem(MemoryGame.STORAGE_KEY)) || [];
-    }
-
-    init() {
-        this.initializeCards();
-        this.shuffleCards();
-        this.renderCards();
-        this.addEventListeners();
-        this.startTimer();
-    }
-
-    initializeCards() {
-        this.cards = [...MemoryGame.EMOJIS, ...MemoryGame.EMOJIS];
-    }
-
-    shuffleCards() {
-        for (let i = this.cards.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
-        }
-    }
-
-    renderCards() {
-        this.gameBoard.innerHTML = '';
-        this.cards.forEach((card, index) => {
-            const cardElement = this.createCard(index, card);
-            this.gameBoard.appendChild(cardElement);
-        });
-    }
-
-    createCard(id, image) {
+    
+    // Mezclar el array
+    const shuffledCards = cards.sort(() => Math.random() - 0.5);
+    
+    // Limpiar el tablero
+    gameBoard.innerHTML = '';
+    
+    // Crear las cartas
+    shuffledCards.forEach((animal, index) => {
         const card = document.createElement('div');
         card.className = 'card';
-        card.dataset.id = id;
+        card.setAttribute('data-animal', animal);
         
-        const cardFront = document.createElement('div');
-        cardFront.className = 'card-front';
-        
-        const cardBack = document.createElement('div');
-        cardBack.className = 'card-back';
-        
-        const cardContent = document.createElement('div');
-        cardContent.className = 'card-content';
-        cardContent.textContent = image;
-        
-        cardBack.appendChild(cardContent);
-        card.appendChild(cardFront);
-        card.appendChild(cardBack);
-        
-        return card;
-    }
-
-    addEventListeners() {
-        this.gameBoard.addEventListener('click', this.handleCardClick.bind(this));
-        this.restartBtn.addEventListener('click', this.restartGame.bind(this));
-    }
-
-    handleCardClick(e) {
-        const card = e.target.closest('.card');
-        if (card && this.canFlipCard(card)) {
-            this.flipCard(card);
-        }
-    }
-
-    canFlipCard(card) {
-        return !card.classList.contains('flipped') && 
-               this.flippedCards.length < 2 &&
-               !this.flippedCards.includes(card);
-    }
-
-    flipCard(card) {
-        card.classList.add('flipped');
-        this.flippedCards.push(card);
-
-        if (this.flippedCards.length === 2) {
-            this.updateMoves();
-            this.checkMatch();
-        }
-    }
-
-    updateMoves() {
-        this.moves++;
-        this.movesElement.textContent = `Movimientos: ${this.moves}`;
-    }
-
-    checkMatch() {
-        const [card1, card2] = this.flippedCards;
-        const [value1, value2] = [
-            this.cards[card1.dataset.id],
-            this.cards[card2.dataset.id]
-        ];
-        
-        if (value1 === value2) {
-            this.handleMatch();
-        } else {
-            this.handleMismatch(card1, card2);
-        }
-    }
-
-    handleMatch() {
-        this.matchedPairs++;
-        this.flippedCards = [];
-        if (this.matchedPairs === MemoryGame.EMOJIS.length) {
-            this.gameWon();
-        }
-    }
-
-    handleMismatch(card1, card2) {
-        setTimeout(() => {
-            card1.classList.remove('flipped');
-            card2.classList.remove('flipped');
-            this.flippedCards = [];
-        }, MemoryGame.FLIP_DELAY);
-    }
-
-    startTimer() {
-        this.timerInterval = setInterval(() => {
-            this.timer++;
-            this.updateTimerDisplay();
-        }, 1000);
-    }
-
-    updateTimerDisplay() {
-        this.timerElement.textContent = `Tiempo: ${this.timer}s`;
-    }
-
-    gameWon() {
-        clearInterval(this.timerInterval);
-        const score = this.calculateScore();
-        this.updateRanking(score);
-        this.showWinMessage(score);
-    }
-
-    calculateScore() {
-        return {
-            moves: this.moves,
-            time: this.timer,
-            date: new Date().toLocaleDateString(),
-            points: this.calculatePoints()
-        };
-    }
-
-    calculatePoints() {
-        return Math.round(1000 * (MemoryGame.EMOJIS.length / this.moves) * (1000 / this.timer));
-    }
-
-    showWinMessage(score) {
-        alert(`¡Felicitaciones! 
-               Completaste el juego en ${score.moves} movimientos y ${score.time} segundos
-               Puntuación: ${score.points} puntos`);
-    }
-
-    updateRanking(score) {
-        this.ranking.push(score);
-        this.ranking.sort((a, b) => b.points - a.points);
-        this.ranking = this.ranking.slice(0, MemoryGame.MAX_RANKING_ITEMS);
-        this.saveRanking();
-        this.updateRankingDisplay();
-    }
-
-    saveRanking() {
-        localStorage.setItem(MemoryGame.STORAGE_KEY, JSON.stringify(this.ranking));
-    }
-
-    updateRankingDisplay() {
-        const rankingList = document.getElementById('ranking-list');
-        rankingList.innerHTML = this.ranking
-            .map(this.createRankingItem)
-            .join('');
-    }
-
-    createRankingItem(score, index) {
-        return `
-            <li>
-                #${index + 1} - ${score.date}
-                <br>🏆 Puntos: ${score.points}
-                <br>🎯 Movimientos: ${score.moves}
-                <br>⏱️ Tiempo: ${score.time}s
-            </li>
+        card.innerHTML = `
+            <div class="card-inner">
+                <div class="card-front"></div>
+                <div class="card-back">
+                    <span class="card-content">${animal}</span>
+                </div>
+            </div>
         `;
-    }
+        
+        card.addEventListener('click', () => flipCard(card));
+        gameBoard.appendChild(card);
+    });
+}
 
-    addRankingEventListeners() {
-        this.viewRankingBtn.addEventListener('click', this.toggleRanking.bind(this));
-        this.clearRankingBtn.addEventListener('click', this.clearRanking.bind(this));
-    }
-
-    toggleRanking() {
-        const isHidden = this.rankingDiv.style.display === 'none';
-        this.rankingDiv.style.display = isHidden ? 'block' : 'none';
-        this.viewRankingBtn.textContent = isHidden ? 'Ocultar Ranking' : 'Ver Ranking';
-        if (isHidden) this.updateRankingDisplay();
-    }
-
-    clearRanking() {
-        if (confirm('¿Estás seguro de que quieres borrar el ranking?')) {
-            localStorage.removeItem(MemoryGame.STORAGE_KEY);
-            this.ranking = [];
-            this.updateRankingDisplay();
-            alert('Ranking borrado correctamente');
-        }
-    }
-
-    restartGame() {
-        clearInterval(this.timerInterval);
-        this.initializeProperties();
-        this.resetDisplay();
-        this.init();
-    }
-
-    resetDisplay() {
-        this.movesElement.textContent = 'Movimientos: 0';
-        this.timerElement.textContent = 'Tiempo: 0';
+function flipCard(card) {
+    if (!canFlip || card.classList.contains('flipped') || card === firstCard) return;
+    
+    card.classList.add('flipped');
+    
+    if (!firstCard) {
+        firstCard = card;
+        startTimer();
+    } else {
+        secondCard = card;
+        canFlip = false;
+        checkMatch();
     }
 }
 
-// Inicialización del juego
-document.addEventListener('DOMContentLoaded', () => new MemoryGame());
+function checkMatch() {
+    moves++;
+    updateMoves();
+    
+    const firstAnimal = firstCard.getAttribute('data-animal');
+    const secondAnimal = secondCard.getAttribute('data-animal');
+    
+    if (firstAnimal === secondAnimal) {
+        matchedPairs++;
+        resetCards();
+        if (matchedPairs === 15) {
+            endGame();
+        }
+    } else {
+        setTimeout(() => {
+            firstCard.classList.remove('flipped');
+            secondCard.classList.remove('flipped');
+            resetCards();
+        }, 1000);
+    }
+}
+
+function resetCards() {
+    firstCard = null;
+    secondCard = null;
+    canFlip = true;
+}
+
+function updateMoves() {
+    document.getElementById('moves-count').textContent = moves;
+}
+
+function startTimer() {
+    if (!timerInterval) {
+        timerInterval = setInterval(() => {
+            timeElapsed++;
+            document.getElementById('time-count').textContent = timeElapsed;
+        }, 1000);
+    }
+}
+
+function endGame() {
+    clearInterval(timerInterval);
+    saveScore();
+    alert(`¡Felicitaciones! Has completado el juego en ${timeElapsed} segundos con ${moves} movimientos.`);
+}
+
+function restartGame() {
+    firstCard = null;
+    secondCard = null;
+    canFlip = true;
+    moves = 0;
+    timeElapsed = 0;
+    matchedPairs = 0;
+    clearInterval(timerInterval);
+    timerInterval = null;
+    
+    document.getElementById('moves-count').textContent = '0';
+    document.getElementById('time-count').textContent = '0';
+    
+    createCards();
+}
+
+function saveScore() {
+    const scores = JSON.parse(localStorage.getItem('scores') || '[]');
+    scores.push({
+        moves: moves,
+        time: timeElapsed,
+        date: new Date().toISOString()
+    });
+    scores.sort((a, b) => a.moves - b.moves);
+    localStorage.setItem('scores', JSON.stringify(scores.slice(0, 10)));
+    updateRanking();
+}
+
+function updateRanking() {
+    const rankingList = document.getElementById('ranking-list');
+    const scores = JSON.parse(localStorage.getItem('scores') || '[]');
+    
+    rankingList.innerHTML = scores.map((score, index) => `
+        <li>
+            #${index + 1} - Movimientos: ${score.moves}, Tiempo: ${score.time}s
+        </li>
+    `).join('');
+}
+
+function clearRanking() {
+    localStorage.removeItem('scores');
+    updateRanking();
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    createCards();
+    updateRanking();
+    
+    document.querySelector('.restart-btn').addEventListener('click', restartGame);
+    document.querySelector('.clear-ranking-btn').addEventListener('click', clearRanking);
+    document.querySelector('.view-ranking-btn').addEventListener('click', () => {
+        const ranking = document.querySelector('.ranking');
+        ranking.hidden = !ranking.hidden;
+    });
+});

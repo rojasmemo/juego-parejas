@@ -49,21 +49,33 @@
 
 /* Tablero */
 .game-board {
-    perspective: 1000px;
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: var(--spacing-md);
-    margin: var(--spacing-lg) 0;
+    grid-template-columns: repeat(6, 1fr); /* Cambiado a 6 columnas */
+    gap: 8px;
+    margin: 20px auto;
+    max-width: 800px; /* Aumentado para acomodar más cartas */
+    padding: var(--spacing-md);
 }
 
 /* Cartas */
 .card {
-    width: 100%;
-    height: 100px;
-    position: relative;
+    aspect-ratio: 3/4;
+    perspective: 1000px;
     cursor: pointer;
+    width: 100%; /* Asegura que la carta ocupe el espacio de la cuadrícula */
+    max-width: 60px; /* Reducido de 80px a 60px */
+}
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
     transform-style: preserve-3d;
-    transition: transform var(--transition-card);
+    transition: transform 0.5s;
+}
+
+.card.flipped .card-inner {
+    transform: rotateY(180deg);
 }
 
 .card-front,
@@ -71,32 +83,36 @@
     position: absolute;
     width: 100%;
     height: 100%;
-    top: 0;
-    left: 0;
     backface-visibility: hidden;
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    font-weight: bold;
+    border-radius: 8px;
 }
 
 .card-front {
-    background: var(--color-primary);
+    background-color: #2196F3;
 }
 
 .card-back {
-    background: var(--color-white);
+    background-color: white;
+    border: 2px solid var(--color-primary);
     transform: rotateY(180deg);
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
 }
 
 .card-content {
-    font-size: var(--font-size-large);
+    font-size: 2em; /* Aumentamos el tamaño para los emojis */
     line-height: 1;
-}
-
-.card.flipped {
-    transform: rotateY(180deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
 .card img {
@@ -205,6 +221,7 @@
 @media (max-width: 480px) {
     .game-board {
         grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
     }
 
     .game-info {
