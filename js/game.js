@@ -132,7 +132,18 @@ function saveScore() {
         time: timeElapsed,
         date: new Date().toISOString()
     });
-    scores.sort((a, b) => a.moves - b.moves);
+
+    // Ordenar primero por movimientos y luego por tiempo
+    scores.sort((a, b) => {
+        if (a.moves === b.moves) {
+            // Si hay empate en movimientos, desempatar por tiempo
+            return a.time - b.time;
+        }
+        // Si no hay empate, ordenar por movimientos
+        return a.moves - b.moves;
+    });
+
+    // Guardar solo los 10 mejores resultados
     localStorage.setItem('scores', JSON.stringify(scores.slice(0, 10)));
     updateRanking();
 }
@@ -144,6 +155,7 @@ function updateRanking() {
     rankingList.innerHTML = scores.map((score, index) => `
         <li>
             #${index + 1} - Movimientos: ${score.moves}, Tiempo: ${score.time}s
+            <small>(${new Date(score.date).toLocaleDateString()})</small>
         </li>
     `).join('');
 }
