@@ -93,7 +93,7 @@
 }
 
 .card-front {
-    background-color: #2196F3;
+    background-color: var(--color-primary); /* Cambiamos de #2196F3 a la variable del color aguamarina */
 }
 
 .card-back {
@@ -199,6 +199,16 @@
 
 #ranking-list li:hover {
     transform: translateX(5px);
+}
+
+.ranking-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    background: var(--color-white);
+    border-radius: var(--border-radius-md);
 }
 
 /* Media queries */

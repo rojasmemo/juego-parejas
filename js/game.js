@@ -11,6 +11,33 @@ class MemoryGame {
             this.gameWon();
         }
     }
+
+    showWinMessage(score) {
+        let position = this.getRankingPosition(score);
+        let message = `¡Felicitaciones! 
+                       Completaste el juego en ${score.moves} movimientos y ${score.time} segundos
+                       Puntuación: ${score.points} puntos`;
+
+        if (position <= 3) {
+            const motivationalMessages = {
+                1: "🏆 ¡INCREÍBLE! ¡Has conseguido el PRIMER PUESTO! Eres una verdadera leyenda del juego.",
+                2: "🥈 ¡ESPECTACULAR! ¡Segundo puesto! Estás entre los mejores jugadores de todos los tiempos.",
+                3: "🥉 ¡EXTRAORDINARIO! ¡Tercer puesto! Tu destreza mental es admirable."
+            };
+            message += `\n\n${motivationalMessages[position]}`;
+        }
+
+        alert(message);
+    }
+
+    getRankingPosition(score) {
+        // Crear una copia del ranking actual más el nuevo score
+        const allScores = [...this.ranking, score];
+        // Ordenar por puntos de mayor a menor
+        allScores.sort((a, b) => b.points - a.points);
+        // Encontrar la posición del score actual
+        return allScores.findIndex(s => s === score) + 1;
+    }
     // ...existing code...
 }
 
@@ -116,8 +143,73 @@ function startTimer() {
 
 function endGame() {
     clearInterval(timerInterval);
-    saveScore();
-    alert(`¡Felicitaciones! Has completado el juego en ${timeElapsed} segundos con ${moves} movimientos.`);
+    const score = {
+        moves: moves,
+        time: timeElapsed,
+        points: calculatePoints(moves, timeElapsed),
+        date: new Date().toISOString()
+    };
+    saveScore(score);
+    showWinMessage(score);
+}
+
+function calculatePoints(moves, time) {
+    // Ajustamos la fórmula para dar más peso a menos movimientos y menor tiempo
+    const basePoints = 10000;
+    const movesPenalty = moves * 50;  // 50 puntos menos por cada movimiento
+    const timePenalty = time * 10;    // 10 puntos menos por cada segundo
+    
+    return Math.max(basePoints - movesPenalty - timePenalty, 0);
+}
+
+function showWinMessage(score) {
+    const position = getRankingPosition(score);
+    let message = `¡Felicitaciones! 
+                   Completaste el juego en ${score.moves} movimientos y ${score.time} segundos
+                   Puntuación: ${score.points} puntos`;
+
+    if (position <= 3) {
+        const motivationalMessages = {
+            1: "🏆 ¡INCREÍBLE! ¡Has conseguido el PRIMER PUESTO! Eres una verdadera leyenda del juego.",
+            2: "🥈 ¡ESPECTACULAR! ¡Segundo puesto! Estás entre los mejores jugadores de todos los tiempos.",
+            3: "🥉 ¡EXTRAORDINARIO! ¡Tercer puesto! Tu destreza mental es admirable."
+        };
+        message += `\n\n${motivationalMessages[position]}`;
+    }
+
+    alert(message);
+}
+
+function getRankingPosition(score) {
+    const scores = JSON.parse(localStorage.getItem('scores') || '[]');
+    const allScores = [...scores, score];
+    // Ordenar por puntos de mayor a menor
+    allScores.sort((a, b) => b.points - a.points);
+    // Encontrar la posición del score actual
+    return allScores.findIndex(s => 
+        s.moves === score.moves && 
+        s.time === score.time && 
+        s.points === score.points
+    ) + 1;
+}
+
+function saveScore(score) {
+    let scores = JSON.parse(localStorage.getItem('scores') || '[]');
+    scores.push(score);
+    
+    // Ordenar por puntos (mayor a menor) y en caso de empate por tiempo (menor a mayor)
+    scores.sort((a, b) => {
+        if (b.points === a.points) {
+            return a.time - b.time;
+        }
+        return b.points - a.points;
+    });
+    
+    // Mantener solo los 10 mejores
+    scores = scores.slice(0, 10);
+    
+    localStorage.setItem('scores', JSON.stringify(scores));
+    updateRanking();
 }
 
 function restartGame() {
@@ -136,37 +228,19 @@ function restartGame() {
     createCards();
 }
 
-function saveScore() {
-    const scores = JSON.parse(localStorage.getItem('scores') || '[]');
-    scores.push({
-        moves: moves,
-        time: timeElapsed,
-        date: new Date().toISOString()
-    });
-
-    // Ordenar primero por movimientos y luego por tiempo
-    scores.sort((a, b) => {
-        if (a.moves === b.moves) {
-            // Si hay empate en movimientos, desempatar por tiempo
-            return a.time - b.time;
-        }
-        // Si no hay empate, ordenar por movimientos
-        return a.moves - b.moves;
-    });
-
-    // Guardar solo los 10 mejores resultados
-    localStorage.setItem('scores', JSON.stringify(scores.slice(0, 10)));
-    updateRanking();
-}
-
 function updateRanking() {
     const rankingList = document.getElementById('ranking-list');
     const scores = JSON.parse(localStorage.getItem('scores') || '[]');
     
     rankingList.innerHTML = scores.map((score, index) => `
-        <li>
-            #${index + 1} - Movimientos: ${score.moves}, Tiempo: ${score.time}s
-            <small>(${new Date(score.date).toLocaleDateString()})</small>
+        <li class="ranking-item">
+            <div class="ranking-position">${index + 1}º</div>
+            <div class="ranking-details">
+                <span class="ranking-points">🏆 ${score.points} puntos</span>
+                <span class="ranking-moves">🎯 ${score.moves} movimientos</span>
+                <span class="ranking-time">⏱️ ${score.time} segundos</span>
+                <span class="ranking-date">${new Date(score.date).toLocaleDateString()}</span>
+            </div>
         </li>
     `).join('');
 }
