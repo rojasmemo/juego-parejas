@@ -1,7 +1,7 @@
 /* Variables globales */
 :root {
     /* Colores */
-    --color-primary: #2196F3;
+    --color-primary: #40E0D0; /* Color aguamarina */
     --color-success: #4CAF50;
     --color-danger: #f44336;
     --color-white: #ffffff;
@@ -50,9 +50,9 @@
 /* Tablero */
 .game-board {
     display: grid;
-    grid-template-columns: repeat(6, 1fr); /* Cambiado a 6 columnas */
-    gap: 8px;
-    margin: 20px auto;
+    grid-template-columns: repeat(5, 1fr); /* Cambiamos a 5 columnas */
+    gap: var(--spacing-md);
+    margin: var(--spacing-lg) 0;
     max-width: 800px; /* Aumentado para acomodar más cartas */
     padding: var(--spacing-md);
 }
@@ -204,7 +204,7 @@
 /* Media queries */
 @media (max-width: 768px) {
     .game-board {
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(4, 1fr);
     }
 
     .buttons {
@@ -220,7 +220,7 @@
 
 @media (max-width: 480px) {
     .game-board {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 5px;
     }
 

@@ -1,7 +1,18 @@
-const ANIMAL_EMOJIS = [
-    '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼',
-    '🐨', '🦁', '🐯', '🐸', '🦉', '🦒', '🦘'
-];
+class MemoryGame {
+    // Reducimos de 15 a 10 emojis
+    static EMOJIS = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯'];
+    // ...existing code...
+    
+    handleMatch() {
+        this.matchedPairs++;
+        this.flippedCards = [];
+        // Cambiamos la condición de victoria a 10 parejas
+        if (this.matchedPairs === 10) {
+            this.gameWon();
+        }
+    }
+    // ...existing code...
+}
 
 let firstCard = null;
 let secondCard = null;
@@ -13,12 +24,12 @@ let matchedPairs = 0;
 
 function createCards() {
     const gameBoard = document.querySelector('.game-board');
-    const totalPairs = 15; // 30 cartas en total (15 pares)
+    const totalPairs = 10; // Cambiado de 15 a 10 parejas (20 cartas en total)
     const cards = [];
     
     // Crear array con pares de animales
     for (let i = 0; i < totalPairs; i++) {
-        cards.push(ANIMAL_EMOJIS[i], ANIMAL_EMOJIS[i]);
+        cards.push(MemoryGame.EMOJIS[i], MemoryGame.EMOJIS[i]);
     }
     
     // Mezclar el array
@@ -72,7 +83,7 @@ function checkMatch() {
     if (firstAnimal === secondAnimal) {
         matchedPairs++;
         resetCards();
-        if (matchedPairs === 15) {
+        if (matchedPairs === 10) { // Cambiado de 15 a 10
             endGame();
         }
     } else {
